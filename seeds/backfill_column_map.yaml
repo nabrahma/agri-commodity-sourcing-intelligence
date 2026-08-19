@@ -1,0 +1,14 @@
+# Maps a downloaded history CSV's headers onto the API schema.
+# Every header in the CSV must appear here; an unmapped column is an error,
+# because silently dropping one is how a price lands in the wrong field.
+columns:
+  State: state
+  District: district
+  Market: market
+  Commodity: commodity
+  Variety: variety
+  Grade: grade
+  Arrival_Date: arrival_date
+  Min_Price: min_price
+  Max_Price: max_price
+  Modal_Price: modal_price

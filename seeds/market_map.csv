@@ -1,0 +1,61 @@
+raw_market,district,market_canonical,state,lat,lon
+Lasalgaon,Nashik,Lasalgaon,Maharashtra,20.1425,74.2377
+Lasalgaon(Niphad),Nashik,Lasalgaon,Maharashtra,20.1425,74.2377
+Pimpalgaon,Nashik,Pimpalgaon,Maharashtra,20.1708,73.9836
+Pimpalgaon Baswant,Nashik,Pimpalgaon,Maharashtra,20.1708,73.9836
+Yeola,Nashik,Yeola,Maharashtra,20.0425,74.4894
+Nashik,Nashik,Nashik,Maharashtra,19.9975,73.7898
+Chandvad,Nashik,Chandvad,Maharashtra,20.3297,74.2436
+Devla,Nashik,Devla,Maharashtra,20.4650,74.1750
+Pune,Pune,Pune,Maharashtra,18.5204,73.8567
+Pune(Pimpri),Pune,Pune,Maharashtra,18.5204,73.8567
+Junnar,Pune,Junnar,Maharashtra,19.2064,73.8752
+Manchar,Pune,Manchar,Maharashtra,19.0028,73.9403
+Solapur,Solapur,Solapur,Maharashtra,17.6599,75.9064
+Ahmednagar,Ahmednagar,Ahmednagar,Maharashtra,19.0948,74.7480
+Rahata,Ahmednagar,Rahata,Maharashtra,19.7100,74.4800
+Sangamner,Ahmednagar,Sangamner,Maharashtra,19.5697,74.2110
+Mumbai,Mumbai,Mumbai,Maharashtra,19.0760,72.8777
+Kolhapur,Kolhapur,Kolhapur,Maharashtra,16.7050,74.2433
+Satara,Satara,Satara,Maharashtra,17.6805,74.0183
+Aurangabad,Aurangabad,Aurangabad,Maharashtra,19.8762,75.3433
+Jalgaon,Jalgaon,Jalgaon,Maharashtra,21.0077,75.5626
+Nagpur,Nagpur,Nagpur,Maharashtra,21.1458,79.0882
+Bangalore,Bangalore,Bangalore,Karnataka,12.9716,77.5946
+Hubli,Dharwad,Hubli,Karnataka,15.3647,75.1240
+Belgaum,Belgaum,Belgaum,Karnataka,15.8497,74.4977
+Bellary,Bellary,Bellary,Karnataka,15.1394,76.9214
+Chitradurga,Chitradurga,Chitradurga,Karnataka,14.2251,76.3980
+Davangere,Davangere,Davangere,Karnataka,14.4644,75.9218
+Mysore,Mysore,Mysore,Karnataka,12.2958,76.6394
+Kolar,Kolar,Kolar,Karnataka,13.1357,78.1326
+Agra,Agra,Agra,Uttar Pradesh,27.1767,78.0081
+Kanpur,Kanpur,Kanpur,Uttar Pradesh,26.4499,80.3319
+Lucknow,Lucknow,Lucknow,Uttar Pradesh,26.8467,80.9462
+Varanasi,Varanasi,Varanasi,Uttar Pradesh,25.3176,82.9739
+Farrukhabad,Farrukhabad,Farrukhabad,Uttar Pradesh,27.3929,79.5800
+Meerut,Meerut,Meerut,Uttar Pradesh,28.9845,77.7064
+Ahmedabad,Ahmedabad,Ahmedabad,Gujarat,23.0225,72.5714
+Rajkot,Rajkot,Rajkot,Gujarat,22.3039,70.8022
+Surat,Surat,Surat,Gujarat,21.1702,72.8311
+Bhavnagar,Bhavnagar,Bhavnagar,Gujarat,21.7645,72.1519
+Mahuva,Bhavnagar,Mahuva,Gujarat,21.0833,71.7833
+Deesa,Banaskantha,Deesa,Gujarat,24.2589,72.1906
+Indore,Indore,Indore,Madhya Pradesh,22.7196,75.8577
+Bhopal,Bhopal,Bhopal,Madhya Pradesh,23.2599,77.4126
+Ujjain,Ujjain,Ujjain,Madhya Pradesh,23.1793,75.7849
+Dewas,Dewas,Dewas,Madhya Pradesh,22.9676,76.0534
+Neemuch,Neemuch,Neemuch,Madhya Pradesh,24.4739,74.8706
+Jaipur,Jaipur,Jaipur,Rajasthan,26.9124,75.7873
+Jodhpur,Jodhpur,Jodhpur,Rajasthan,26.2389,73.0243
+Alwar,Alwar,Alwar,Rajasthan,27.5530,76.6346
+Bikaner,Bikaner,Bikaner,Rajasthan,28.0229,73.3119
+Kota,Kota,Kota,Rajasthan,25.2138,75.8648
+Kolkata,Kolkata,Kolkata,West Bengal,22.5726,88.3639
+Siliguri,Darjeeling,Siliguri,West Bengal,26.7271,88.3953
+Burdwan,Burdwan,Burdwan,West Bengal,23.2324,87.8615
+Medinipur,Medinipur,Medinipur,West Bengal,22.4257,87.3199
+Patna,Patna,Patna,Bihar,25.5941,85.1376
+Muzaffarpur,Muzaffarpur,Muzaffarpur,Bihar,26.1209,85.3647
+Gaya,Gaya,Gaya,Bihar,24.7955,85.0002
+Bhagalpur,Bhagalpur,Bhagalpur,Bihar,25.2425,86.9842

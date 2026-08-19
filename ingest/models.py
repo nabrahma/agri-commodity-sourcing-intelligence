@@ -14,6 +14,7 @@ Two ideas are load-bearing here:
 from __future__ import annotations
 
 from datetime import date, datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field
 
@@ -48,6 +49,22 @@ class ValidationError(SourcingError):
     def __init__(self, reject_reason: str, message: str | None = None) -> None:
         self.reject_reason = reject_reason
         super().__init__(message or reject_reason)
+
+
+class RejectReason(str, Enum):
+    """Fixed vocabulary. Every quarantined row carries exactly one of these,
+    and every one of them has a dedicated test."""
+
+    UNPARSEABLE_DATE = "UNPARSEABLE_DATE"
+    FUTURE_DATE = "FUTURE_DATE"
+    UNPARSEABLE_PRICE = "UNPARSEABLE_PRICE"
+    NON_POSITIVE_PRICE = "NON_POSITIVE_PRICE"
+    MIN_GT_MAX = "MIN_GT_MAX"
+    MODAL_OUT_OF_RANGE = "MODAL_OUT_OF_RANGE"
+    MISSING_REQUIRED_FIELD = "MISSING_REQUIRED_FIELD"
+    UNKNOWN_COMMODITY = "UNKNOWN_COMMODITY"
+    UNKNOWN_MARKET = "UNKNOWN_MARKET"
+    DUPLICATE_GRAIN = "DUPLICATE_GRAIN"
 
 
 # --------------------------------------------------------------------------

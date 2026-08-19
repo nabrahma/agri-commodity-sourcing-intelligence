@@ -1,0 +1,41 @@
+name: daily-pull
+
+on:
+  schedule:
+    - cron: "30 2 * * *"   # 08:00 IST, after the morning price upload
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: Pull today's prices
+        env:
+          DATA_GOV_API_KEY: ${{ secrets.DATA_GOV_API_KEY }}
+        run: python -m ingest.daily
+
+      - name: Clean and rebuild
+        run: |
+          python -m transform.clean
+          python -m transform.warehouse
+          python -m analytics.queries
+
+      # The landing zone is append-only, so this commit adds partitions and
+      # never rewrites yesterday's.
+      - name: Commit new partitions
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f data/raw docs/data_quality.md
+          git diff --staged --quiet || git commit -m "data: daily pull $(date -u +%Y-%m-%d)"
+          git push

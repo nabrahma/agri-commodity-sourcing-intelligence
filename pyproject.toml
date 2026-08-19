@@ -32,11 +32,24 @@ markers = [
     "slow: tests that take more than a second",
     "smoke: hits the real API; never run in CI",
 ]
-filterwarnings = ["error::DeprecationWarning"]
+filterwarnings = [
+    "error::DeprecationWarning",
+    # pandas 2.2 + numpy 2.x internal: raised inside pandas' own concat/NaT
+    # handling, not by this project. Remove once pandas is upgraded.
+    "default:The 'generic' unit for NumPy timedelta:DeprecationWarning",
+]
 
 [tool.coverage.run]
 source = ["ingest", "transform", "simulate"]
-omit = ["*/__init__.py"]
+omit = [
+    "*/__init__.py",
+    # The clean-clone test runs the pipeline as a subprocess against a copy of
+    # the packages in a temp root. pytest-cov measures that subprocess too, so
+    # the same code would otherwise be counted twice -- once at ~95% and once
+    # at whatever one pipeline run happens to touch.
+    "*pytest-of-*",
+    "*tmp*",
+]
 
 [tool.coverage.report]
 show_missing = true

@@ -15,5 +15,4 @@ jobs:
       - run: ruff check .
       - run: ruff format --check .
       # No network in CI: every HTTP call in the suite is mocked with respx.
-      # --cov-fail-under is raised to 85 once Phase 3 lands real transform code.
-      - run: pytest -v --cov=ingest --cov=transform --cov=simulate --cov-report=term-missing
+      - run: pytest -v --cov=ingest --cov=transform --cov=simulate --cov-report=term-missing --cov-fail-under=85

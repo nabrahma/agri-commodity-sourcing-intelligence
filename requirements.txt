@@ -10,6 +10,7 @@ pyyaml==6.0.2
 structlog==24.4.0
 streamlit==1.39.0
 plotly==5.24.1
+tabulate==0.9.0
 
 # Test & lint
 pytest==8.3.3

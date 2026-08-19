@@ -1,0 +1,45 @@
+{
+  "S1": {
+    "strategy": "S1",
+    "commodity": "Onion",
+    "weeks": 52,
+    "total_purchase_cost_inr": 95993701.96,
+    "total_transport_cost_inr": 0.0,
+    "total_storage_cost_inr": 0.0,
+    "total_shrinkage_loss_qtl": 0.0,
+    "total_cost_inr": 95993701.96,
+    "cost_per_qtl_delivered_inr": 1599.895,
+    "weeks_with_shortfall": 0
+  },
+  "S2": {
+    "strategy": "S2",
+    "commodity": "Onion",
+    "weeks": 52,
+    "total_purchase_cost_inr": 83993701.96,
+    "total_transport_cost_inr": 960546.83,
+    "total_storage_cost_inr": 0.0,
+    "total_shrinkage_loss_qtl": 0.0,
+    "total_cost_inr": 84954248.79,
+    "cost_per_qtl_delivered_inr": 1415.9041,
+    "weeks_with_shortfall": 0
+  },
+  "S3": {
+    "strategy": "S3",
+    "commodity": "Onion",
+    "weeks": 52,
+    "total_purchase_cost_inr": 84033511.89,
+    "total_transport_cost_inr": 961100.99,
+    "total_storage_cost_inr": 17307.69,
+    "total_shrinkage_loss_qtl": 34.6154,
+    "total_cost_inr": 85011920.57,
+    "cost_per_qtl_delivered_inr": 1416.8653,
+    "weeks_with_shortfall": 0
+  },
+  "saving": {
+    "baseline_total_inr": 95993701.9615,
+    "S2_saving_inr": 11039453.1715,
+    "S2_saving_pct": 11.5002,
+    "S3_saving_inr": 10981781.3902,
+    "S3_saving_pct": 11.4401
+  }
+}

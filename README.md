@@ -20,37 +20,64 @@ variety-wise daily wholesale prices from the national agricultural market
 network. The method is source-agnostic; the feed is what happens to be
 publicly available at daily granularity across hundreds of markets.
 
-## Status
+## The answer
+
+On the committed fixture panel — eight markets, 364 days, 2,912 observations
+— switching from *always buy at the home market* to *buy wherever landed
+cost is lowest within 500 km* saves:
+
+> ### ₹88.1 lakh a year — 9.18% of a ₹960 lakh programme
+> ₹1,600.0 → ₹1,453.1 per quintal delivered, 500 tonnes a month.
+
+The median trading day shows a **19.3% price spread** between the cheapest
+and dearest reporting market. The **binding assumption is transport cost**;
+at ₹6 per quintal per 100 km instead of ₹4 the saving shrinks materially,
+though S2 still beats S1 across the whole plausible range.
+
+The timing strategy (S3) added **nothing** on this panel — no dip was ever
+deep enough to trigger stockpiling, and where it does, storage and
+shrinkage eat the gain. Reported as found.
+
+> **These figures come from the committed fixture panel, not observed
+> market data.** The pipeline is complete and reproducible; supply a
+> `DATA_GOV_API_KEY` and run the same commands to produce the live numbers.
+> See [docs/brief.md](docs/brief.md) for the one-page version.
+
+## Build status
 
 Built phase by phase against [`build-spec.md`](build-spec.md). Each phase
 ends with an exit gate that must be green before the next begins.
 
 | Phase | Scope | State |
 |---|---|---|
-| 0 | Scaffold, config, error model, record models | ✅ complete |
-| 1 | API client | not started |
-| 2 | Ingestion & immutable landing zone | not started |
-| 3 | Cleaning & validation | not started |
-| 4 | DuckDB warehouse | not started |
-| 5 | Analytics SQL | not started |
-| 6 | Simulation engine | not started |
-| 7 | Sensitivity analysis | not started |
-| 8 | Dashboard | not started |
-| 9 | Automation & CI | not started |
-| 10 | End-to-end integration | not started |
-| 11 | Documentation & packaging | not started |
-
-The headline number goes here once Phase 6 is green. It is deliberately
-absent until then.
+| 0 | Scaffold, config, error model, record models | complete |
+| 1 | API client | complete |
+| 2 | Ingestion & immutable landing zone | complete |
+| 3 | Cleaning & validation | complete |
+| 4 | DuckDB warehouse | complete |
+| 5 | Analytics SQL | complete |
+| 6 | Simulation engine | complete |
+| 7 | Sensitivity analysis | complete |
+| 8 | Dashboard | complete |
+| 9 | Automation & CI | complete |
+| 10 | End-to-end integration | complete |
+| 11 | Documentation & packaging | complete |
 
 ## Quick start
 
 ```bash
-pip install -r requirements.txt   # or: make install
+python -m venv .venv && make install
 cp .env.example .env              # then paste your data.gov.in API key
-make test                         # runs the suite; no network required
+make test                         # full suite; no network required
 make lint
+
+make backfill                     # needs the API key
+make all                          # clean -> build -> analyse -> simulate
+make dashboard                    # streamlit
 ```
+
+Every target runs against `.venv` if one exists, so the pipeline can never
+install itself over a global interpreter.
 
 ## Layout
 
