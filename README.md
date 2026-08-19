@@ -107,7 +107,7 @@ selection, not freight.
 ```bash
 python -m venv .venv
 make install                  # requirements-dev.txt: runtime plus test tooling
-make test                     # 279 tests, no network required
+make test                     # 280 tests, no network required
 make lint
 make dashboard                # works straight away; the outputs are committed
 ```
@@ -128,7 +128,14 @@ The split follows one rule: **results ship, bulk does not.**
 | | Size | In git | Why |
 |---|---|---|---|
 | `data/processed/analytics/`, `data/processed/simulation/` | 248 KB | yes | The materialised outputs the dashboard reads. These are the real result of the full run, not a sample, which is why the hosted app shows genuine numbers. |
-| `data/raw/` | 25 MB | no | The landed archive. Reproducible in one command, and version control is the wrong place for it. |
+| `data/raw/source=api/` | ~75 KB per day | yes | Forward accrual from the scheduled pull. Committing it is the only persistence this project has, and it is how history builds on from where the archive stops. |
+| `data/raw/source=backfill/` | 25 MB | no | The 2019-2023 archive. Bulk, and reproducible in one command; version control is the wrong place for it. |
+
+The scheduled workflow pulls and commits raw days **and nothing else.** It
+deliberately does not rebuild the reports or dashboard inputs: the runner
+only ever holds the day it just fetched, so regenerating there would
+overwrite figures covering 1.31M records with figures covering about 1,900.
+Those artefacts are rebuilt locally, where the full landing zone lives.
 
 So the dashboard works immediately on a fresh clone. **Rebuilding the
 underlying archive is only needed if you want to change the method, widen
@@ -167,12 +174,12 @@ analytics/   version-controlled SQL, one file per question
 simulate/    geo, costs, strategies, week loop, sensitivity
 dashboard/   Streamlit app, reads materialised parquet only
 tools/       one-off utilities: market geocoding, screenshot capture
-tests/       279 tests: unit, contract, property, golden and end-to-end
+tests/       280 tests: unit, contract, property, golden and end-to-end
 ```
 
 | | |
 |---|---|
-| Tests | 279 passing |
+| Tests | 280 passing |
 | Coverage | 94% on `ingest` / `transform` / `simulate` |
 | Suite runtime | under 90 seconds, no network |
 | Records processed | 1,307,905 raw -> 535,547 clean |

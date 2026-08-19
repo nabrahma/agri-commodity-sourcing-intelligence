@@ -75,3 +75,32 @@ def test_no_secrets_anywhere_in_tracked_source(project_root):
         for match in KEY_LIKE.findall(text):
             # The public resource id is not a secret.
             assert "9ef84268" in match or len(match) < 32, f"{path}: {match[:8]}..."
+
+
+def test_daily_workflow_does_not_rebuild_derived_artefacts(workflows):
+    """The runner only ever has the day it just pulled.
+
+    An earlier version of this workflow ran clean/warehouse/analytics after
+    the pull and committed the result. With no archive on the runner that
+    regenerated docs/data_quality.md from ~1,900 rows and overwrote the
+    report covering 1.31M, which is a silent loss: the workflow goes green
+    while the committed numbers become wrong.
+    """
+    text = workflows["daily-pull.yml"].read_text(encoding="utf-8")
+
+    for module in ("transform.clean", "transform.warehouse", "analytics.queries"):
+        assert module not in text, (
+            f"daily-pull runs {module}, which would rebuild committed outputs "
+            "from a single day of data"
+        )
+
+    parsed = yaml.safe_load(text)
+    steps = parsed["jobs"]["pull"]["steps"]
+    commit = next(s for s in steps if "git commit" in str(s.get("run", "")))
+    run = commit["run"]
+
+    assert "data/raw/source=api" in run, "the daily pull must commit its partitions"
+    assert "docs/" not in run, "generated docs must not be committed from CI"
+    assert (
+        "git add -f" not in run
+    ), "a force-add hides the policy; the path is un-ignored in .gitignore"

@@ -16,6 +16,12 @@ data/**
 !data/processed/analytics/*.parquet
 !data/processed/simulation/*.parquet
 !data/processed/simulation/*.json
+
+# The daily pull accrues here, roughly 75 KB a day. Committing it is the
+# only persistence this project has, and it is how history builds forward
+# from the point the archive stops. The bulk 2019-2023 backfill
+# (source=backfill, 25 MB) is never committed.
+!data/raw/source=api/**/*.parquet
 *.duckdb
 *.duckdb.wal
 

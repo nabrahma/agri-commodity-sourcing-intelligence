@@ -199,8 +199,13 @@ def test_every_dashboard_input_is_committed(project_root):
     assert not missing, f"not committed, so the hosted app cannot read them: {missing}"
 
 
-def test_raw_landing_zone_is_not_committed(project_root):
-    """The aggregates ship; the 25 MB archive behind them does not."""
+def test_bulk_archive_is_not_committed(project_root):
+    """The daily pull accrues in git; the 25 MB backfill never does.
+
+    Forward accrual is small (~75 KB a day) and is the only persistence
+    this project has. The historical archive is bulk and rebuilds in one
+    command, so letting it into git is a habit worth catching early.
+    """
     import subprocess
 
     tracked = subprocess.run(
@@ -209,5 +214,6 @@ def test_raw_landing_zone_is_not_committed(project_root):
         capture_output=True,
         text=True,
     ).stdout.split()
-    parquet = [f for f in tracked if f.endswith(".parquet")]
-    assert not parquet, f"raw landing zone must stay out of git: {parquet[:3]}"
+
+    backfill = [f for f in tracked if "source=backfill" in f]
+    assert not backfill, f"the bulk archive must stay out of git: {backfill[:3]}"
