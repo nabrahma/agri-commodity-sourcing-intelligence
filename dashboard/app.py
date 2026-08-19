@@ -75,11 +75,19 @@ def break_at_gaps(frame: pd.DataFrame, date_column: str) -> pd.DataFrame:
     )
 
 
+@st.cache_data(show_spinner=False)
+def _read_parquet(path: str, modified_at: float) -> pd.DataFrame:
+    """Cached read. `modified_at` is part of the cache key, not the body:
+    rebuilding an output changes its mtime and invalidates the entry, so a
+    refresh is never served stale."""
+    return pd.read_parquet(path)
+
+
 def load_frame(name: str) -> pd.DataFrame:
     path = REQUIRED_PARQUET.get(name) or OPTIONAL_PARQUET.get(name)
     if path is None or not path.exists():
         return pd.DataFrame()
-    return pd.read_parquet(path)
+    return _read_parquet(str(path), path.stat().st_mtime)
 
 
 def load_assumptions_text() -> str:

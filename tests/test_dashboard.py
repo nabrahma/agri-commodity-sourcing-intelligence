@@ -217,3 +217,34 @@ def test_bulk_archive_is_not_committed(project_root):
 
     backfill = [f for f in tracked if "source=backfill" in f]
     assert not backfill, f"the bulk archive must stay out of git: {backfill[:3]}"
+
+
+def test_cached_reads_are_keyed_on_path_and_mtime(tmp_path, monkeypatch):
+    """Caching must not serve one file's contents for another, nor keep
+    serving a stale copy after the pipeline rewrites an output."""
+    import importlib
+
+    app = importlib.import_module("dashboard.app")
+    app._read_parquet.clear()
+
+    first = tmp_path / "spread.parquet"
+    second = tmp_path / "coverage.parquet"
+    pd.DataFrame({"a": [1]}).to_parquet(first, index=False)
+    pd.DataFrame({"a": [2, 2]}).to_parquet(second, index=False)
+    monkeypatch.setattr(app, "REQUIRED_PARQUET", {"spread": first, "coverage": second})
+    monkeypatch.setattr(app, "OPTIONAL_PARQUET", {})
+
+    # Two different files must not collide in the cache.
+    assert len(app.load_frame("spread")) == 1
+    assert len(app.load_frame("coverage")) == 2
+
+    # A rewritten file must not keep serving the old contents.
+    import os
+    import time
+
+    pd.DataFrame({"a": [9, 9, 9]}).to_parquet(first, index=False)
+    stamp = time.time() + 10
+    os.utime(first, (stamp, stamp))
+    assert len(app.load_frame("spread")) == 3, "stale cache entry was served"
+
+    app._read_parquet.clear()

@@ -107,7 +107,7 @@ selection, not freight.
 ```bash
 python -m venv .venv
 make install                  # requirements-dev.txt: runtime plus test tooling
-make test                     # 280 tests, no network required
+make test                     # 281 tests, no network required
 make lint
 make dashboard                # works straight away; the outputs are committed
 ```
@@ -174,12 +174,12 @@ analytics/   version-controlled SQL, one file per question
 simulate/    geo, costs, strategies, week loop, sensitivity
 dashboard/   Streamlit app, reads materialised parquet only
 tools/       one-off utilities: market geocoding, screenshot capture
-tests/       280 tests: unit, contract, property, golden and end-to-end
+tests/       281 tests: unit, contract, property, golden and end-to-end
 ```
 
 | | |
 |---|---|
-| Tests | 280 passing |
+| Tests | 281 passing |
 | Coverage | 94% on `ingest` / `transform` / `simulate` |
 | Suite runtime | under 90 seconds, no network |
 | Records processed | 1,307,905 raw -> 535,547 clean |
