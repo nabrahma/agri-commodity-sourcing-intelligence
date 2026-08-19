@@ -311,6 +311,19 @@ def e2e_root(tmp_path):
     for directory in ("raw", "processed", "quarantine", "warehouse"):
         (root / "data" / directory).mkdir(parents=True)
     (root / "docs").mkdir()
+
+    # The real config names a home market from the live panel, which the
+    # fixture panel does not contain. Point it at one that does.
+    assumptions_path = root / "config" / "assumptions.yaml"
+    assumptions_path.write_text(
+        assumptions_path.read_text(encoding="utf-8")
+        .replace('home_market: "Sambhal"', 'home_market: "Lasalgaon"')
+        # Blank the pinned window so the engine falls back to this panel's
+        # own date range instead of the live panel's 2022.
+        .replace('start_date: "2022-01-03"', 'start_date: ""')
+        .replace('end_date: "2023-01-02"', 'end_date: ""'),
+        encoding="utf-8",
+    )
     return root
 
 

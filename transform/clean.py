@@ -302,7 +302,10 @@ def write_quarantine(
 
 
 def write_data_quality_report(
-    clean: pd.DataFrame, rejected: pd.DataFrame, path: Path
+    clean: pd.DataFrame,
+    rejected: pd.DataFrame,
+    path: Path,
+    out_of_scope_rows: int = 0,
 ) -> Path:
     """Counts by reject reason, plus coverage by market. Regenerated on every
     clean run so the numbers in the docs can never drift from the data."""
@@ -320,13 +323,17 @@ def write_data_quality_report(
         "",
         "| Stage | Rows |",
         "|---|---|",
-        f"| Raw records read | {total:,} |",
+        f"| Raw records landed | {total + out_of_scope_rows:,} |",
+        f"| Outside configured scope (state / commodity) | {out_of_scope_rows:,} |",
+        f"| Records considered | {total:,} |",
         f"| Clean records kept | {len(clean):,} |",
         f"| Records quarantined | {len(rejected):,} |",
         f"| Retention | {(100.0 * len(clean) / total if total else 0):.2f}% |",
         "",
-        "Every raw row is either kept or quarantined with a reason. The two "
-        "counts always sum to the first; there is an assertion for it.",
+        "Scope exclusion is a deliberate filter, not a data-quality failure, "
+        "so it is reported separately. Of the records considered, every one is "
+        "either kept or quarantined with a reason, and the two counts always "
+        "sum to the total; there is an assertion for it.",
         "",
         "## Rejections by reason",
         "",
@@ -374,6 +381,30 @@ def write_data_quality_report(
     return path
 
 
+def apply_scope(raw: pd.DataFrame, states: list[str], commodities: list[str]):
+    """Restrict to the configured analytical scope.
+
+    Rows for other states or commodities are OUT OF SCOPE, not rejects.
+    Counting them as UNKNOWN_MARKET would bury the real data-quality signal
+    under a filter the analyst chose deliberately.
+    """
+    if raw.empty:
+        return raw, 0
+
+    before = len(raw)
+    in_scope = raw[
+        raw["state"].isin(states) & raw["commodity"].isin(commodities)
+    ].reset_index(drop=True)
+    dropped = before - len(in_scope)
+    log.info(
+        "clean.scope_filter",
+        rows_in=before,
+        rows_in_scope=len(in_scope),
+        rows_out_of_scope=dropped,
+    )
+    return in_scope, dropped
+
+
 def main() -> int:
     from appconfig import PROJECT_ROOT, load_settings, resolve_path
     from ingest.land import read_landed
@@ -384,6 +415,10 @@ def main() -> int:
     if raw.empty:
         log.error("clean.no_input", path=str(resolve_path("raw")))
         return 1
+
+    raw, out_of_scope = apply_scope(
+        raw, settings["scope"]["states"], settings["scope"]["commodities"]
+    )
 
     clean, rejected = clean_dataframe(
         raw,
@@ -397,7 +432,7 @@ def main() -> int:
     clean.to_parquet(processed / "clean.parquet", index=False)
     write_quarantine(rejected, resolve_path("quarantine"))
     write_data_quality_report(
-        clean, rejected, PROJECT_ROOT / "docs" / "data_quality.md"
+        clean, rejected, PROJECT_ROOT / "docs" / "data_quality.md", out_of_scope
     )
 
     log.info("clean.written", rows=len(clean), rejected=len(rejected))

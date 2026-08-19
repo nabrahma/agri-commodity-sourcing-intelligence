@@ -40,6 +40,26 @@ def partition_dir(root: Path, source: str, pulled_date: date, commodity: str) ->
     )
 
 
+def _as_text(frame: pd.DataFrame) -> pd.DataFrame:
+    """Store every source column as text, preserving nulls.
+
+    The feed is inconsistent about types: the same price column arrives as
+    a JSON number in most rows and a string in others, which parquet cannot
+    represent in one column. Landing everything as text keeps the payload
+    byte-faithful and leaves interpretation to transform/parse.py, which is
+    where a malformed value can be rejected with a reason instead of
+    silently coerced.
+    """
+    out = frame.copy()
+    for column in out.columns:
+        out[column] = out[column].map(
+            lambda v: None
+            if v is None or (isinstance(v, float) and pd.isna(v))
+            else str(v)
+        )
+    return out
+
+
 def _next_part_path(directory: Path) -> Path:
     """First unused ``part-NNN.parquet`` in the directory."""
     existing = sorted(directory.glob("part-*.parquet"))
@@ -65,6 +85,7 @@ def land_records(
         return None
 
     frame = pd.DataFrame(records)
+    frame = _as_text(frame)
     frame["fetched_at_utc"] = (fetched_at_utc or datetime.now(UTC)).isoformat()
     frame["source"] = source
     frame["ingest_run_id"] = ingest_run_id or new_run_id()

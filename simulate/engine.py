@@ -311,9 +311,21 @@ def saving_vs_baseline(results: dict[str, SimulationResult]) -> dict[str, float]
     return out
 
 
-def prices_from_warehouse(con, commodity: str, included_only: bool = True):
-    """Decision-ready price panel: one modal price per (date, market)."""
+def prices_from_warehouse(
+    con, commodity: str, variety: str | None = None, included_only: bool = True
+):
+    """Decision-ready price panel: one modal price per (date, market).
+
+    `variety` matters more than it looks. Markets quote different grades of
+    the same commodity -- one lists Red onion, another 1st Sort, another
+    Medium -- and their price levels differ by 40% or more for reasons that
+    have nothing to do with geography. Comparing across them turns a grade
+    difference into a phantom arbitrage, so the panel is normally pinned to
+    a single variety.
+    """
     clause = "AND m.is_included" if included_only else ""
+    variety_clause = "AND f.variety = ?" if variety else ""
+    params = [commodity] + ([variety] if variety else [])
     return con.execute(
         f"""
         SELECT f.date_key            AS date,
@@ -324,18 +336,24 @@ def prices_from_warehouse(con, commodity: str, included_only: bool = True):
         JOIN dim_commodity c USING (commodity_sk)
         WHERE c.commodity_canonical = ?
           AND NOT COALESCE(f.is_outlier, FALSE)
+          {variety_clause}
           {clause}
         GROUP BY f.date_key, m.market_canonical
         ORDER BY f.date_key, m.market_canonical
         """,
-        [commodity],
+        params,
     ).df()
 
 
 def markets_from_warehouse(con):
+    """Included markets with coordinates.
+
+    coverage_pct comes along so the sensitivity sweep can re-apply a
+    different inclusion threshold without rebuilding the warehouse.
+    """
     return con.execute(
-        "SELECT market_canonical, lat, lon FROM dim_market "
-        "WHERE is_included AND lat IS NOT NULL AND lon IS NOT NULL"
+        "SELECT market_canonical, lat, lon, coverage_pct, observations "
+        "FROM dim_market WHERE is_included AND lat IS NOT NULL AND lon IS NOT NULL"
     ).df()
 
 
@@ -352,9 +370,10 @@ def main() -> int:
         return 1
 
     commodity = settings["scope"]["commodities"][0]
+    variety = (assumptions.get("simulation") or {}).get("varieties", {}).get(commodity)
     con = duckdb.connect(str(warehouse), read_only=True)
     try:
-        prices = prices_from_warehouse(con, commodity)
+        prices = prices_from_warehouse(con, commodity, variety)
         markets = markets_from_warehouse(con)
     finally:
         con.close()
@@ -363,8 +382,25 @@ def main() -> int:
         log.error("simulate.no_prices", commodity=commodity)
         return 1
 
-    start = pd.to_datetime(prices["date"]).min().date()
-    end = pd.to_datetime(prices["date"]).max().date()
+    window = assumptions.get("simulation") or {}
+    start = (
+        pd.to_datetime(window["start_date"]).date()
+        if window.get("start_date")
+        else pd.to_datetime(prices["date"]).min().date()
+    )
+    end = (
+        pd.to_datetime(window["end_date"]).date()
+        if window.get("end_date")
+        else pd.to_datetime(prices["date"]).max().date()
+    )
+    log.info(
+        "simulate.window",
+        start=str(start),
+        end=str(end),
+        commodity=commodity,
+        variety=variety,
+        markets=len(markets),
+    )
     results = compare_strategies(prices, assumptions, commodity, start, end, markets)
     saving = saving_vs_baseline(results)
 

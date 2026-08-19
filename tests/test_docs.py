@@ -42,9 +42,12 @@ def test_readme_has_headline_number(project_root):
     readme = (project_root / "README.md").read_text(encoding="utf-8")
 
     assert "₹" in readme, "the README must carry a rupee figure"
-    assert re.search(r"₹\s?[\d,]+(\.\d+)?\s*(lakh|crore|per quintal|/qtl)?", readme)
-    assert "9.18%" in readme, "the headline saving must appear"
-    assert "fixture panel" in readme, "the provenance of the number must be stated"
+    assert re.search(r"₹\s?[\d,]+(\.\d+)?\s*(lakh|crore|/quintal|/qtl)", readme)
+    assert re.search(r"\d+(\.\d+)?%", readme), "state the saving as a percentage"
+    # Provenance: a headline number without its data behind it is a claim.
+    assert re.search(
+        r"[\d,]{7,}\s+observed price records", readme
+    ), "the README must say how many records the number rests on"
 
 
 # --- 11.2 ------------------------------------------------------------------
@@ -130,8 +133,11 @@ def test_limitations_names_the_binding_assumption(project_root):
 def test_brief_states_a_range_not_only_a_point(project_root):
     brief = (project_root / "docs" / "brief.md").read_text(encoding="utf-8")
 
-    assert "lakh" in brief
-    assert re.search(r"₹\s?\d+[–-]\d+\s*lakh", brief), "state the saving as a range"
+    assert re.search(r"₹\s?[\d,.]+\s*(lakh|crore|/quintal|/qtl)", brief)
+    # A point estimate hides the uncertainty; a range is the honest form.
+    assert re.search(
+        r"\d+(\.\d+)?%\s*(to|–|-)\s*\d+(\.\d+)?%", brief
+    ), "state the saving as a range, not only a point"
     assert "Limitations" in brief
     assert "Recommendation" in brief
 

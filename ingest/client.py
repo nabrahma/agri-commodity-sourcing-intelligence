@@ -28,6 +28,12 @@ log = structlog.get_logger(__name__)
 RETRYABLE_STATUS = {429}
 REDACTED = "***REDACTED***"
 
+# data.gov.in accepts the request but never sends a response body when the
+# User-Agent is httpx's default, so every call dies on read timeout. A
+# conventional UA is required, not cosmetic.
+USER_AGENT = "agri-commodity-sourcing-intelligence/0.1 (+https://github.com/nabrahma)"
+DEFAULT_HEADERS = {"User-Agent": USER_AGENT, "Accept": "application/json"}
+
 _API_KEY_QS = re.compile(r"(api-key=)[^&\s]*", re.IGNORECASE)
 
 
@@ -63,7 +69,9 @@ class MarketPriceAPIClient:
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
         self.sleep_seconds = sleep_seconds
-        self._client = httpx.Client(timeout=float(timeout_seconds))
+        self._client = httpx.Client(
+            timeout=float(timeout_seconds), headers=DEFAULT_HEADERS
+        )
 
     # -- internals ---------------------------------------------------------
 
@@ -149,7 +157,7 @@ class MarketPriceAPIClient:
                 (httpx.TimeoutException, httpx.ConnectError, _RetryableHTTPError)
             ),
             stop=stop_after_attempt(self.max_retries),
-            wait=wait_exponential(multiplier=1, min=1, max=16),
+            wait=wait_exponential(multiplier=2, min=2, max=120),
             before_sleep=self._log_retry,
             reraise=True,
         )

@@ -32,7 +32,7 @@ DEFAULT_GRID: dict[str, list[float]] = {
     "storage_inr_per_qtl_per_week": [7.5, 15.0, 30.0],
     "shrinkage_ratio_per_week": [0.5, 1.0, 1.5],  # multiples of base
     "dip_trigger_ratio": [0.85, 0.90, 0.95],
-    "min_coverage_pct": [60.0, 70.0, 80.0],
+    "min_coverage_pct": [45.0, 55.0, 65.0],
 }
 
 RESULT_COLUMNS = (
@@ -78,10 +78,22 @@ def apply_parameter(
     return modified
 
 
-def _filter_markets(markets: pd.DataFrame, min_coverage_pct: float) -> pd.DataFrame:
+def _filter_markets(
+    markets: pd.DataFrame, min_coverage_pct: float, home_market: str | None = None
+) -> pd.DataFrame:
+    """Re-apply an inclusion threshold to the candidate markets.
+
+    The home market is always retained: the buyer already sources there, so
+    it remains available whatever threshold is applied to everyone else.
+    Dropping it would make the S1 baseline undefined rather than worse.
+    """
     if "coverage_pct" not in markets.columns:
         return markets
-    return markets[markets["coverage_pct"] >= min_coverage_pct].reset_index(drop=True)
+
+    keep = markets["coverage_pct"] >= min_coverage_pct
+    if home_market is not None:
+        keep = keep | (markets["market_canonical"] == home_market)
+    return markets[keep].reset_index(drop=True)
 
 
 def run_sensitivity(
@@ -111,7 +123,9 @@ def run_sensitivity(
             assumptions = apply_parameter(base_assumptions, parameter, value, commodity)
             market_table = markets
             if parameter in MARKET_PARAMS and markets is not None:
-                market_table = _filter_markets(markets, value)
+                market_table = _filter_markets(
+                    markets, value, base_assumptions["buyer"]["home_market"]
+                )
 
             results = compare_strategies(
                 prices, assumptions, commodity, start, end, market_table
@@ -223,19 +237,30 @@ def main() -> int:
         return 1
 
     commodity = settings["scope"]["commodities"][0]
+    assumptions = load_assumptions()
+    window = assumptions.get("simulation") or {}
+    variety = (window.get("varieties") or {}).get(commodity)
     con = duckdb.connect(str(warehouse), read_only=True)
     try:
-        prices = prices_from_warehouse(con, commodity)
+        prices = prices_from_warehouse(con, commodity, variety)
         markets = markets_from_warehouse(con)
     finally:
         con.close()
 
+    import pandas as pd
+
     frame = run_sensitivity(
-        load_assumptions(),
+        assumptions,
         DEFAULT_GRID,
         commodity,
         prices,
         markets,
+        start=pd.to_datetime(window["start_date"]).date()
+        if window.get("start_date")
+        else None,
+        end=pd.to_datetime(window["end_date"]).date()
+        if window.get("end_date")
+        else None,
         base_min_coverage_pct=settings["quality"]["min_coverage_pct"],
     )
     tornado = tornado_data(frame)

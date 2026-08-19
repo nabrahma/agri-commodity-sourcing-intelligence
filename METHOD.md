@@ -142,17 +142,31 @@ Star schema in DuckDB: `dim_market`, `dim_commodity`, `dim_date`,
 coverage_pct = 100.0 * COUNT(DISTINCT date_key)
              / (DATE_DIFF('day', MIN(date_key), MAX(date_key)) + 1)
 
-is_included  = (coverage_pct >= 70.0 AND observations >= 200)
+is_included  = (coverage_pct >= 55.0 AND observations >= 200
+                AND lat IS NOT NULL AND lon IS NOT NULL)
 ```
 
 Coverage is measured against the market's **own observed span**, so a
 market that started reporting late is not penalised for the period before
-it existed. Both thresholds are inclusive: exactly 70.0% with exactly 200
-observations qualifies.
+it existed. Both thresholds are inclusive.
+
+A market with no coordinates is **never included**, whatever its coverage:
+without a position there is no computable freight cost, so it cannot be a
+sourcing candidate.
+
+**On the 55% threshold.** The build spec proposed 70%, calibrated for a
+true daily feed. The historical archives are not that: mandis trade on
+market days, so median market coverage is 50.7% and the best market over
+five years reaches 88.3%. At 70% only **4 markets** qualified — fewer than
+`min_markets_for_spread`, so no spread could be computed at all. 55%
+corresponds to a market trading roughly four days a week consistently and
+yields a 54-market panel. This is a judgement call, which is why it is
+swept in the sensitivity grid — where it turns out to be the **binding
+assumption**.
 
 | Threshold | Value | Config key |
 |---|---|---|
-| Minimum coverage | 70.0% | `quality.min_coverage_pct` |
+| Minimum coverage | 55.0% | `quality.min_coverage_pct` |
 | Minimum observations | 200 | `quality.min_observations` |
 | Minimum markets for a spread day | 10 | `quality.min_markets_for_spread` |
 | Outlier z threshold | 4.0 | `quality.outlier_z_threshold` |
@@ -312,6 +326,30 @@ Phase 7 sensitivity grid.
 | `moving_average_days` | 20 | the trailing window |
 | `max_multiple_of_need` | 2.0 | never buy more than 2× the week's need |
 
+### 7.5 Simulation window and variety
+
+| Key | Value | Note |
+|---|---|---|
+| `simulation.start_date` | 2022-01-03 | first Monday of 2022 |
+| `simulation.end_date` | 2023-01-02 | 52 weeks later |
+| `simulation.varieties.Onion` | Red | 26 qualifying markets |
+| `simulation.varieties.Potato` | Desi | 22 qualifying markets |
+| `simulation.varieties.Tomato` | Deshi | 22 qualifying markets |
+
+**Why the window is pinned.** Calendar 2022 is the one full year in which
+the home market quotes almost every day (361 reporting days). 2019 and 2023
+are part-years in the archive and 2021 has a 309-day gap, so simulating
+across them would mean buying on stale quotes rather than observed prices.
+
+**Why the variety is pinned — this one changes the answer.** Markets quote
+different grades of the same commodity: Sambhal lists Red onion at ~₹1,608
+a quintal, Sikar lists 1st Sort at ~₹978, Harda lists Medium at ~₹830. The
+two markets never quote the same variety on the same day. Comparing across
+grades turns a quality difference into a phantom spatial arbitrage: doing so
+produced a **50.4% "saving"**, which fell to **35.5%** once the panel was
+pinned to a single variety. The spread that survives is a like-for-like
+comparison; the rest was composition.
+
 ---
 
 ## 8. Sensitivity
@@ -326,7 +364,11 @@ never mutated. Default grid:
 | `storage_inr_per_qtl_per_week` | 7.5, 15, 30 |
 | `shrinkage_ratio_per_week` | 0.5×, 1×, 1.5× of base |
 | `dip_trigger_ratio` | 0.85, 0.90, 0.95 |
-| `min_coverage_pct` | 60, 70, 80 |
+| `min_coverage_pct` | 45, 55, 65 |
+
+The home market is always retained when `min_coverage_pct` is swept: the
+buyer already sources there, so raising the bar on everyone else must not
+leave the S1 baseline undefined.
 
 `tornado_data` ranks parameters by the spread of outcomes they produce.
 The top row is the **binding assumption**. `conclusion_stability` reports

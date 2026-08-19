@@ -1,0 +1,30 @@
+# Historical price datasets on data.gov.in, one resource per commodity-year.
+#
+# The main resource (settings.api.resource_id) is a CURRENT-DAY feed only:
+# querying it for any past arrival_date returns zero rows. Multi-year history
+# therefore has to come from these per-year archives.
+#
+# Their schema differs from the live feed and is normalised on ingest:
+#   _state_      -> state
+#   arrival_date -> ISO timestamp rather than DD/MM/YYYY
+#   grade        -> absent entirely
+#   update_date  -> dropped
+resources:
+  Onion:
+    2019: 8d779906-fe3b-4b1c-a081-6b0af25a8ab7
+    2020: d8d806a7-57ec-4e73-b481-9dd0ab8320a2
+    2021: f7001fa9-c6cf-425c-b0cf-5447debd00d3
+    2022: 01742262-931a-4bbf-97a5-6d5c3dc90181
+    2023: 04ca8032-7a19-4e56-906e-e46c0cbef666
+  Potato:
+    2019: 9d555fe5-02b4-4f9c-a099-458e7b75a644
+    2020: 53b89d46-d666-45f5-986c-54d134efd92e
+    2021: 92003ec9-1de0-4693-a40c-2b3e2eaa6c81
+    2022: ee8f9b9a-3935-44d6-8b21-e2ac7765d779
+    2023: da7c92ff-0e50-447f-9f92-48fabb4a105a
+  Tomato:
+    2019: a2e9f000-d8e1-47d6-b8f1-ffecb2d39e03
+    2020: 25c977b6-8e8c-4452-87fb-52d626ec5374
+    2021: 2fd1940c-f831-42ae-8b3c-b87fc2c44183
+    2022: a31be25c-b4fa-4503-acb5-8b7590863546
+    2023: 4cc2f05e-5542-4fa3-afa5-cc075d31b4ba

@@ -22,26 +22,36 @@ publicly available at daily granularity across hundreds of markets.
 
 ## The answer
 
-On the committed fixture panel — eight markets, 364 days, 2,912 observations
-— switching from *always buy at the home market* to *buy wherever landed
-cost is lowest within 500 km* saves:
+Built on **1,307,905 observed price records** from India's national mandi
+archive (2019–2023, 8 states), simulating 52 weekly purchase decisions over
+calendar 2022 for a 500 tonne/month onion buyer.
 
-> ### ₹88.1 lakh a year — 9.18% of a ₹960 lakh programme
-> ₹1,600.0 → ₹1,453.1 per quintal delivered, 500 tonnes a month.
+> ### The saving is 11%–38%, median 33% — and which number you get depends on where you buy today, not on where you could buy.
+> Best reachable landed cost is **₹1,039–1,065/quintal** almost regardless of
+> starting market. A buyer anchored at Sambhal (₹1,611/qtl) saves **₹3.4
+> crore a year**; one already at Siyana (₹1,169/qtl) saves 11%.
 
-The median trading day shows a **19.3% price spread** between the cheapest
-and dearest reporting market. The **binding assumption is transport cost**;
-at ₹6 per quintal per 100 km instead of ₹4 the saving shrinks materially,
-though S2 still beats S1 across the whole plausible range.
+**The binding assumption is which markets you count** — at a 45% coverage
+bar the saving is 22.2%, at 65% it is 35.5%. Freight barely matters:
+doubling it moves the answer 0.3 points, because the price gap dwarfs the
+haulage.
 
-The timing strategy (S3) added **nothing** on this panel — no dip was ever
-deep enough to trigger stockpiling, and where it does, storage and
-shrinkage eat the gain. Reported as found.
+**The timing strategy lost money.** S3 (buy ahead on dips) came in 7% worse
+than S2: shrinkage at 3%/week and storage at ₹15/qtl/week ate more than the
+dips returned. Reported as found.
 
-> **These figures come from the committed fixture panel, not observed
-> market data.** The pipeline is complete and reproducible; supply a
-> `DATA_GOV_API_KEY` and run the same commands to produce the live numbers.
-> See [docs/brief.md](docs/brief.md) for the one-page version.
+### Two errors this project caught in itself
+
+1. **Grade mixing.** Markets quote different grades under one commodity
+   name. Comparing across them showed a **50.4% saving that collapsed to
+   35.5%** once the panel was pinned to a single variety. The build spec's
+   ">30% means you have a bug" tripwire is what caught it.
+2. **A silent-failure geocoder.** The first market-mapping run reported 173
+   markets "not found" that plainly exist; it was treating rate-limit
+   responses as absence. Fixed, then 208 of 260 located and every one
+   validated against its own state's bounding box.
+
+See [docs/brief.md](docs/brief.md) for the one-page version.
 
 ## Build status
 

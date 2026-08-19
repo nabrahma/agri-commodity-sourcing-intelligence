@@ -48,6 +48,8 @@ def record(market="Lasalgaon", modal="1600", arrival="18/08/2026", variety="Red"
 class FakeClient:
     """Client stand-in that serves pre-canned pages and records its offsets."""
 
+    sleep_seconds = 0.0
+
     def __init__(
         self, pages: list[list[dict]], total: int = 0, fail_after: int | None = None
     ):

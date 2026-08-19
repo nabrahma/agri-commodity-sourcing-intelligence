@@ -6,7 +6,12 @@ buyer:
   monthly_requirement_tonnes: 500
   purchase_frequency: "weekly"
   max_radius_km: 500
-  home_market: "Lasalgaon"
+  # Chosen from the data, not by reputation. Lasalgaon is India's benchmark
+  # onion market, but in the 2019-2023 archive it does not clear the coverage
+  # threshold, so it cannot serve as a baseline that must quote every week.
+  # Sambhal has 2,560 observations and 32 qualifying markets within 500 km --
+  # the best-supported buyer location in this panel.
+  home_market: "Sambhal"
 
 costs:
   transport_inr_per_qtl_per_100km: 4.0
@@ -23,6 +28,26 @@ commodities:
   Tomato:
     max_storage_weeks: 1
     shrinkage_ratio_per_week: 0.08
+
+simulation:
+  # Calendar 2022, the one full year in which the home market quotes almost
+  # every day (361 reporting days). 2019 and 2023 are part-years in the
+  # archive and 2021 has a long gap, so simulating across them would mean
+  # buying on stale quotes rather than on observed prices. Stated explicitly
+  # rather than inferred, so the window is auditable.
+  start_date: "2022-01-03"   # first Monday of 2022
+  end_date: "2023-01-02"     # 52 weeks later
+
+  # Pin the panel to one variety per commodity. Markets quote different
+  # grades of the same commodity and their price levels differ by 40% or
+  # more for reasons unrelated to geography, so mixing them manufactures a
+  # spatial "saving" that is really a grade difference. Each variety below
+  # is the one quoted by the most qualifying markets, and is also the
+  # variety the home market trades.
+  varieties:
+    Onion: "Red"      # 26 qualifying markets
+    Potato: "Desi"    # 22 qualifying markets
+    Tomato: "Deshi"   # 22 qualifying markets
 
 strategy_s3:
   dip_trigger_ratio: 0.90     # buy extra when price < 0.90 * MA20

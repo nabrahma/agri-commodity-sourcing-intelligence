@@ -8,6 +8,7 @@ map, and reconciles it against the API pull where the two overlap.
 from __future__ import annotations
 
 import argparse
+import time
 from datetime import date, datetime
 from pathlib import Path
 
@@ -70,6 +71,8 @@ def run_backfill(
         log.info("backfill.start", commodity=commodity, resume_offset=offset)
 
         while page < max_pages:
+            if page:
+                time.sleep(client.sleep_seconds)
             records, total = client.fetch_page(
                 offset=offset, limit=page_size, filters={"commodity": commodity}
             )
@@ -98,6 +101,92 @@ def run_backfill(
 
         landed[commodity] = rows
         log.info("backfill.complete", commodity=commodity, rows=rows)
+
+    return landed
+
+
+# -- historical archive backfill -------------------------------------------
+
+# The per-year archives use a different field spelling from the live feed.
+HISTORY_RENAMES = {"_state_": "state"}
+HISTORY_DROP = ("update_date",)
+
+
+def normalise_history_record(record: dict) -> dict:
+    """Map one archive record onto the live-feed schema.
+
+    Missing fields are set to None rather than guessed. `grade` is absent
+    from every archive year, so it stays null instead of being invented.
+    """
+    out = {
+        HISTORY_RENAMES.get(k, k): v for k, v in record.items() if k not in HISTORY_DROP
+    }
+    for field in API_COLUMNS:
+        out.setdefault(field, None)
+    return {field: out[field] for field in API_COLUMNS}
+
+
+def load_historical_resources(path: Path) -> dict[str, dict[int, str]]:
+    with open(path, encoding="utf-8") as fh:
+        data = yaml.safe_load(fh) or {}
+    return data.get("resources", {})
+
+
+def run_history_backfill(
+    client: MarketPriceAPIClient,
+    resources: dict[str, dict[int, str]],
+    root: Path,
+    page_size: int = 1000,
+    max_pages: int = 5000,
+    commodities: list[str] | None = None,
+) -> dict[str, int]:
+    """Pull every commodity-year archive and land it as `backfill`.
+
+    Each archive is its own resource id, so the client is re-pointed per
+    dataset. Progress is checkpointed per commodity-year, letting an
+    interrupted crawl resume instead of restarting 1.3M rows.
+    """
+    root = Path(root)
+    run_id = new_run_id()
+    landed: dict[str, int] = {}
+    wanted = set(commodities) if commodities else set(resources)
+
+    for commodity, years in sorted(resources.items()):
+        if commodity not in wanted:
+            continue
+        for year, resource_id in sorted(years.items()):
+            key = f"{commodity}-{year}"
+            offset = resume_offset(root, key)
+            client.resource_id = resource_id
+            rows = 0
+            log.info("history.start", commodity=commodity, year=year, resume=offset)
+
+            for page in range(max_pages):
+                if page:
+                    time.sleep(client.sleep_seconds)
+                records, total = client.fetch_page(offset=offset, limit=page_size)
+                if not records:
+                    write_checkpoint(root, key, offset, STATUS_COMPLETE)
+                    break
+
+                land_records(
+                    [normalise_history_record(r) for r in records],
+                    source="backfill",
+                    commodity=commodity,
+                    root=root,
+                    pulled_date=date(int(year), 12, 31),
+                    ingest_run_id=run_id,
+                )
+                rows += len(records)
+                offset += page_size
+                write_checkpoint(root, key, offset, STATUS_IN_PROGRESS)
+
+                if total and offset >= total:
+                    write_checkpoint(root, key, offset, STATUS_COMPLETE)
+                    break
+
+            landed[key] = rows
+            log.info("history.complete", commodity=commodity, year=year, rows=rows)
 
     return landed
 
@@ -318,6 +407,14 @@ def main(argv: list[str] | None = None) -> int:
         default=Path("seeds/backfill_column_map.yaml"),
     )
     parser.add_argument("--reconcile", action="store_true")
+    parser.add_argument(
+        "--history",
+        action="store_true",
+        help="pull the per-year historical archives listed in seeds/",
+    )
+    parser.add_argument(
+        "--commodity", action="append", help="restrict to one commodity"
+    )
     args = parser.parse_args(argv)
 
     settings = load_settings()
@@ -344,6 +441,24 @@ def main(argv: list[str] | None = None) -> int:
         max_retries=api["max_retries"],
         sleep_seconds=api["sleep_seconds"],
     ) as client:
+        if args.history:
+            from appconfig import PROJECT_ROOT
+
+            resources = load_historical_resources(
+                PROJECT_ROOT / "seeds" / "historical_resources.yaml"
+            )
+            landed = run_history_backfill(
+                client,
+                resources,
+                raw_root,
+                page_size=api["page_size"],
+                commodities=args.commodity,
+            )
+            print(f"landed {sum(landed.values()):,} historical rows")
+            for key, rows in sorted(landed.items()):
+                print(f"  {key}: {rows:,}")
+            return 0
+
         run_backfill(
             client,
             settings["scope"]["commodities"],

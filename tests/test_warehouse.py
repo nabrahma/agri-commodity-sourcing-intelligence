@@ -311,3 +311,27 @@ def test_connect_creates_parent_directory(tmp_path):
     create_schema(connection)
     connection.close()
     assert path.exists()
+
+
+def test_market_without_coordinates_is_never_included(con):
+    """An unlocatable market has no computable freight cost, so it cannot be
+    a sourcing candidate no matter how completely it reports."""
+    insert_market_facts(con, 1, "NoCoords", obs=500, distinct_days=10, span_days=10)
+    con.execute("UPDATE dim_market SET lat = NULL, lon = NULL WHERE market_sk = 1")
+    update_market_inclusion(con, 70.0, 200)
+
+    coverage, obs, included = con.execute(
+        "SELECT coverage_pct, observations, is_included FROM dim_market WHERE market_sk = 1"
+    ).fetchone()
+    assert coverage == pytest.approx(100.0)
+    assert obs == 500
+    assert included is False
+
+    con.execute("UPDATE dim_market SET lat = 20.0, lon = 74.0 WHERE market_sk = 1")
+    update_market_inclusion(con, 70.0, 200)
+    assert (
+        con.execute(
+            "SELECT is_included FROM dim_market WHERE market_sk = 1"
+        ).fetchone()[0]
+        is True
+    )

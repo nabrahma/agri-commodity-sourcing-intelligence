@@ -13,7 +13,16 @@ from datetime import date, datetime
 
 from ingest.models import RejectReason, ValidationError
 
-DATE_FORMATS = ("%d/%m/%Y", "%d-%m-%Y", "%Y-%m-%d")
+DATE_FORMATS = (
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+    "%Y-%m-%d",
+    # The historical per-year archives carry an ISO timestamp rather than a
+    # date. The time component is a bulk-upload artefact, not a trading time,
+    # so only the date part is meaningful and only it is kept.
+    "%Y-%m-%dT%H:%M:%SZ",
+    "%Y-%m-%dT%H:%M:%S",
+)
 
 NULL_PRICE_TOKENS = frozenset(
     {"", "-", "--", "na", "n/a", "nr", "nan", "none", "null", "nil", "?"}

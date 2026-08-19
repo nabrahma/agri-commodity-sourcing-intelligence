@@ -16,7 +16,7 @@ from __future__ import annotations
 from datetime import date, datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 # --------------------------------------------------------------------------
 # Errors
@@ -73,7 +73,14 @@ class RejectReason(str, Enum):
 
 
 class RawRecord(BaseModel):
-    """One record exactly as returned by the API. All strings, no casting."""
+    """One record exactly as returned by the API, held as text.
+
+    The live feed sends prices as JSON numbers, not the strings the build
+    spec assumed, and it is inconsistent about it. They are coerced to str
+    here rather than to float: interpreting a price is transform/parse.py's
+    job, and doing it at ingestion would hide a malformed value behind a
+    silent cast.
+    """
 
     state: str
     district: str | None = None
@@ -85,6 +92,11 @@ class RawRecord(BaseModel):
     min_price: str
     max_price: str
     modal_price: str
+
+    @field_validator("min_price", "max_price", "modal_price", mode="before")
+    @classmethod
+    def _numbers_to_text(cls, value: object) -> object:
+        return str(value) if isinstance(value, int | float) else value
 
 
 class CleanRecord(BaseModel):

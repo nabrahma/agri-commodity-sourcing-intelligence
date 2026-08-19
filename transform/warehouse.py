@@ -79,7 +79,12 @@ INCLUSION_SQL = """
 UPDATE dim_market SET
     coverage_pct = sub.coverage_pct,
     observations = sub.obs,
-    is_included  = (sub.coverage_pct >= ? AND sub.obs >= ?)
+    -- Coordinates are part of the rule, not a nicety: a market whose
+    -- position is unknown has no computable freight cost, so it can never
+    -- be a sourcing candidate however well it reports.
+    is_included  = (sub.coverage_pct >= ? AND sub.obs >= ?
+                    AND dim_market.lat IS NOT NULL
+                    AND dim_market.lon IS NOT NULL)
 FROM (
     SELECT market_sk,
            100.0 * COUNT(DISTINCT date_key)

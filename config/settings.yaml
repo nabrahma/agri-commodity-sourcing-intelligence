@@ -17,7 +17,16 @@ scope:
            "West Bengal", "Bihar"]
 
 quality:
-  min_coverage_pct: 70.0
+  # Calibrated against the observed data, not assumed. The historical
+  # archives are not a true daily series: median market coverage is 50.7%
+  # and the best market in five years reaches 88.3%, because mandis trade on
+  # market days rather than every calendar day. At the original 70% only 4
+  # markets qualified -- fewer than min_markets_for_spread, so no spread
+  # could be computed at all. 55% corresponds to a market trading roughly
+  # four days a week consistently, and yields a 54-market panel. The
+  # threshold is swept in the Phase 7 sensitivity grid precisely because it
+  # is a judgement call.
+  min_coverage_pct: 55.0
   min_observations: 200
   min_markets_for_spread: 10
   outlier_z_threshold: 4.0
