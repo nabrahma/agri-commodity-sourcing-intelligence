@@ -12,10 +12,11 @@ ifeq ($(wildcard $(PY)),)
   PY := python
 endif
 
-.PHONY: venv install test test-fast lint format ingest backfill backfill-history reconcile clean build analyse simulate sensitivity dashboard screenshots all
+.PHONY: venv install install-run test test-fast lint format ingest backfill backfill-history reconcile clean build analyse simulate sensitivity dashboard screenshots all
 
 venv:         ; python -m venv $(VENV)
-install:      ; $(PY) -m pip install -r requirements.txt
+install:      ; $(PY) -m pip install -r requirements-dev.txt
+install-run:  ; $(PY) -m pip install -r requirements.txt
 lint:         ; $(PY) -m ruff check . && $(PY) -m ruff format --check .
 format:       ; $(PY) -m ruff format . && $(PY) -m ruff check --fix .
 test:         ; $(PY) -m pytest -v --cov=ingest --cov=transform --cov=simulate --cov-report=term-missing

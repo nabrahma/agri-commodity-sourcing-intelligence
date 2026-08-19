@@ -1,0 +1,16 @@
+# Applied by Streamlit Community Cloud as well as local runs.
+
+[theme]
+base = "light"
+primaryColor = "#1f77b4"
+backgroundColor = "#ffffff"
+secondaryBackgroundColor = "#f4f6f8"
+textColor = "#1a1c1f"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# A stack trace on a public page helps nobody and leaks paths.
+showErrorDetails = false

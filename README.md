@@ -8,7 +8,9 @@ Built on **1,307,905 observed wholesale price records** from India's national
 mandi archive (2019-2023, 8 states, 3 commodities), with a landed-cost model
 and a week-by-week simulation of three sourcing strategies.
 
-![Sourcing strategy simulation](docs/screenshots/04-simulation.png)
+### [Open the live dashboard](https://agri-commodity-sourcing-intelligence.streamlit.app/)
+
+[![Sourcing strategy simulation](docs/screenshots/04-simulation.png)](https://agri-commodity-sourcing-intelligence.streamlit.app/)
 
 ---
 
@@ -104,26 +106,36 @@ selection, not freight.
 
 ```bash
 python -m venv .venv
-make install
-cp .env.example .env          # add your data.gov.in API key
-make test                     # 277 tests, no network required
+make install                  # requirements-dev.txt: runtime plus test tooling
+make test                     # 279 tests, no network required
 make lint
+make dashboard                # works straight away; the outputs are committed
 ```
+
+An API key is only needed to pull fresh data, not to run the dashboard or
+the tests. When you do want one, `cp .env.example .env` and add it there.
+
+`requirements.txt` is runtime only, so the hosted deployment stays lean;
+`requirements-dev.txt` adds pytest, ruff and the rest.
 
 Every target runs against `.venv` if one exists, so the pipeline can never
 install itself over a global interpreter.
 
-### Getting the data
+### What is committed, and what is not
 
-**The repository contains the code, not the dataset.** `data/` is gitignored:
-the landed archive is roughly 200 MB of parquet, which does not belong in
-version control, and it is fully reproducible from the source in one command.
+The split follows one rule: **results ship, bulk does not.**
 
-A fresh clone therefore has **no data and the dashboard will render empty
-until you build it.** That is deliberate, not an oversight. To populate it:
+| | Size | In git | Why |
+|---|---|---|---|
+| `data/processed/analytics/`, `data/processed/simulation/` | 248 KB | yes | The materialised outputs the dashboard reads. These are the real result of the full run, not a sample, which is why the hosted app shows genuine numbers. |
+| `data/raw/` | 25 MB | no | The landed archive. Reproducible in one command, and version control is the wrong place for it. |
+
+So the dashboard works immediately on a fresh clone. **Rebuilding the
+underlying archive is only needed if you want to change the method, widen
+the scope, or extend the date range:**
 
 ```bash
-make backfill-history         # ~1.31M rows, 15 archives, roughly 25 minutes
+make backfill-history         # 1.31M rows, 15 archives, roughly 25 minutes
 make ingest                   # today's live prices (optional)
 make all                      # clean -> warehouse -> analytics -> simulation
 make sensitivity              # tornado data for the last tab
@@ -155,12 +167,12 @@ analytics/   version-controlled SQL, one file per question
 simulate/    geo, costs, strategies, week loop, sensitivity
 dashboard/   Streamlit app, reads materialised parquet only
 tools/       one-off utilities: market geocoding, screenshot capture
-tests/       277 tests: unit, contract, property, golden and end-to-end
+tests/       279 tests: unit, contract, property, golden and end-to-end
 ```
 
 | | |
 |---|---|
-| Tests | 277 passing |
+| Tests | 279 passing |
 | Coverage | 94% on `ingest` / `transform` / `simulate` |
 | Suite runtime | under 90 seconds, no network |
 | Records processed | 1,307,905 raw -> 535,547 clean |

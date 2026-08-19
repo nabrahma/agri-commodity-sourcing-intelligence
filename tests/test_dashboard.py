@@ -169,3 +169,45 @@ def test_chart_breaks_the_line_at_reporting_gaps():
         }
     )
     assert len(app.break_at_gaps(dense, "date_key")) == 5
+
+
+def test_every_dashboard_input_is_committed(project_root):
+    """The hosted app has only what git tracks.
+
+    If an input stops being committed the public dashboard renders empty,
+    and nothing else in the suite would notice.
+    """
+    import importlib
+    import subprocess
+
+    app = importlib.import_module("dashboard.app")
+    tracked = set(
+        subprocess.run(
+            ["git", "ls-files"], cwd=project_root, capture_output=True, text=True
+        ).stdout.split()
+    )
+
+    expected = [
+        path.relative_to(app.PROJECT_ROOT).as_posix()
+        for path in {**app.REQUIRED_PARQUET, **app.OPTIONAL_PARQUET}.values()
+    ]
+    expected.append(
+        (app.SIMULATION_DIR / "summary.json").relative_to(app.PROJECT_ROOT).as_posix()
+    )
+
+    missing = [rel for rel in expected if rel not in tracked]
+    assert not missing, f"not committed, so the hosted app cannot read them: {missing}"
+
+
+def test_raw_landing_zone_is_not_committed(project_root):
+    """The aggregates ship; the 25 MB archive behind them does not."""
+    import subprocess
+
+    tracked = subprocess.run(
+        ["git", "ls-files", "data/raw"],
+        cwd=project_root,
+        capture_output=True,
+        text=True,
+    ).stdout.split()
+    parquet = [f for f in tracked if f.endswith(".parquet")]
+    assert not parquet, f"raw landing zone must stay out of git: {parquet[:3]}"

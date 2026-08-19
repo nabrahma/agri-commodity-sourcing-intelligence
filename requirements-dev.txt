@@ -1,0 +1,9 @@
+# Everything the runtime needs, plus the test and lint toolchain.
+-r requirements.txt
+
+pytest==8.3.3
+pytest-cov==5.0.0
+respx==0.21.1
+hypothesis==6.115.5
+freezegun==1.5.1
+ruff==0.7.1
