@@ -136,3 +136,36 @@ def test_footer_names_source_and_units(project_root):
     assert "data.gov.in" in source
     assert "quintal" in source
     assert "LIMITATIONS.md" in source
+
+
+def test_chart_breaks_the_line_at_reporting_gaps():
+    """A line drawn straight through a month of missing days shows the
+    viewer prices that were never observed. The series must break."""
+    import importlib
+
+    app = importlib.import_module("dashboard.app")
+    frame = pd.DataFrame(
+        {
+            "date_key": pd.to_datetime(
+                ["2022-01-01", "2022-01-02", "2022-06-01", "2022-06-02"]
+            ),
+            "spread_pct": [10.0, 11.0, 12.0, 13.0],
+        }
+    )
+
+    out = app.break_at_gaps(frame, "date_key")
+
+    assert len(out) == len(frame) + 1, "no spacer inserted across the gap"
+    assert out["spread_pct"].isna().sum() == 1
+    # The break sits inside the gap, not on top of a real observation.
+    spacer_date = out.loc[out["spread_pct"].isna(), "date_key"].iloc[0]
+    assert pd.Timestamp("2022-01-02") < spacer_date < pd.Timestamp("2022-06-01")
+
+    # A continuous series is returned untouched.
+    dense = pd.DataFrame(
+        {
+            "date_key": pd.date_range("2022-01-01", periods=5, freq="D"),
+            "spread_pct": [1.0, 2.0, 3.0, 4.0, 5.0],
+        }
+    )
+    assert len(app.break_at_gaps(dense, "date_key")) == 5

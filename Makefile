@@ -12,7 +12,7 @@ ifeq ($(wildcard $(PY)),)
   PY := python
 endif
 
-.PHONY: venv install test test-fast lint format ingest backfill clean build analyse simulate sensitivity dashboard all
+.PHONY: venv install test test-fast lint format ingest backfill backfill-history reconcile clean build analyse simulate sensitivity dashboard screenshots all
 
 venv:         ; python -m venv $(VENV)
 install:      ; $(PY) -m pip install -r requirements.txt
@@ -22,10 +22,13 @@ test:         ; $(PY) -m pytest -v --cov=ingest --cov=transform --cov=simulate -
 test-fast:    ; $(PY) -m pytest -v -m "not slow"
 ingest:       ; $(PY) -m ingest.daily
 backfill:     ; $(PY) -m ingest.backfill
+backfill-history: ; $(PY) -m ingest.backfill --history
+reconcile:    ; $(PY) -m ingest.backfill --reconcile
 clean:        ; $(PY) -m transform.clean
 build:        ; $(PY) -m transform.warehouse
 analyse:      ; $(PY) -m analytics.queries
 simulate:     ; $(PY) -m simulate.engine
 sensitivity:  ; $(PY) -m simulate.sensitivity
 dashboard:    ; $(PY) -m streamlit run dashboard/app.py
+screenshots:  ; $(PY) tools/capture_screenshots.py
 all:          ; $(MAKE) clean && $(MAKE) build && $(MAKE) analyse && $(MAKE) simulate

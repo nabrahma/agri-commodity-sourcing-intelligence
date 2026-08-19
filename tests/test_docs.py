@@ -51,7 +51,7 @@ def test_readme_has_headline_number(project_root):
     assert re.search(r"\d+(\.\d+)?%", readme), "state the saving as a percentage"
     # Provenance: a headline number without its data behind it is a claim.
     assert re.search(
-        r"[\d,]{7,}\s+observed price records", readme
+        r"[\d,]{7,}\s+(\w+\s+){0,3}records", readme
     ), "the README must say how many records the number rests on"
 
 

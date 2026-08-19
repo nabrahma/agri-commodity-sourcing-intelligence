@@ -44,6 +44,36 @@ EXPECTED_COLUMNS = {
 
 GREY = "#9aa0a6"
 
+# A market-day with no report is a gap, not a straight line between the
+# points either side of it. Anything longer than this is broken visually.
+MAX_GAP_DAYS = 7
+
+
+def break_at_gaps(frame: pd.DataFrame, date_column: str) -> pd.DataFrame:
+    """Insert a null row wherever the series skips more than MAX_GAP_DAYS.
+
+    Plotly draws a continuous line through missing dates otherwise, which
+    shows the viewer prices that were never observed.
+    """
+    if len(frame) < 2:
+        return frame
+
+    ordered = frame.sort_values(date_column).reset_index(drop=True)
+    dates = pd.to_datetime(ordered[date_column])
+    gaps = dates.diff().dt.days > MAX_GAP_DAYS
+    if not gaps.any():
+        return ordered
+
+    # Only the date column is carried on the spacer rows. Everything else is
+    # left absent so pandas fills NaN itself, which keeps the original dtypes
+    # instead of concatenating all-NA columns over them.
+    spacer = pd.DataFrame({date_column: dates[gaps] - pd.to_timedelta(1, unit="D")})
+    return (
+        pd.concat([ordered, spacer], ignore_index=True)
+        .sort_values(date_column)
+        .reset_index(drop=True)
+    )
+
 
 def load_frame(name: str) -> pd.DataFrame:
     path = REQUIRED_PARQUET.get(name) or OPTIONAL_PARQUET.get(name)
@@ -102,7 +132,7 @@ def tab_spread(commodity: str) -> None:
 
     st.plotly_chart(
         px.line(
-            frame.sort_values("date_key"),
+            break_at_gaps(frame, "date_key"),
             x="date_key",
             y="spread_pct",
             title=f"{commodity}: daily spread (%)",
@@ -218,10 +248,13 @@ def tab_simulation(commodity: str) -> None:
     columns = st.columns(3)
     for column, strategy in zip(columns, ("S1", "S2", "S3"), strict=False):
         entry = summary.get(strategy, {})
+        # The unit cost goes in the label, not in the delta slot: a delta
+        # renders an arrow, and an arrow beside a cost reads as a movement
+        # that has not happened.
         column.metric(
-            labels[strategy],
-            f"₹{entry.get('total_cost_inr', 0) / 1e5:,.1f} lakh",
+            f"{labels[strategy]}  ·  "
             f"₹{entry.get('cost_per_qtl_delivered_inr', 0):,.0f}/quintal",
+            f"₹{entry.get('total_cost_inr', 0) / 1e5:,.1f} lakh",
         )
 
     saving = summary.get("saving", {})
