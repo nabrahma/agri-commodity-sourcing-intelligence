@@ -1,0 +1,43 @@
+[project]
+name = "agri-commodity-sourcing-intelligence"
+version = "0.1.0"
+description = "Spatial and seasonal price intelligence for agricultural commodity sourcing"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+extend-exclude = ["data", ".venv"]
+
+[tool.ruff.lint]
+# E,F pycodestyle+pyflakes | I import order | B bugbear | UP pyupgrade
+# T20 flags print() outside entrypoints | RET returns | SIM simplify
+select = ["E", "F", "I", "B", "UP", "SIM", "RET"]
+ignore = [
+    "E501",  # line length is enforced by the formatter, not the linter
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B011"]  # bare assert False is fine in tests
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: tests that take more than a second",
+    "smoke: hits the real API; never run in CI",
+]
+filterwarnings = ["error::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["ingest", "transform", "simulate"]
+omit = ["*/__init__.py"]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = ["if TYPE_CHECKING:", "raise NotImplementedError"]

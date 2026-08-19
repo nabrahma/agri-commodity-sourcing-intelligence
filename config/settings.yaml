@@ -1,0 +1,29 @@
+# Runtime configuration. No magic numbers in code, ever.
+# Every threshold used anywhere in the pipeline is declared here.
+
+api:
+  base_url: "https://api.data.gov.in/resource"
+  resource_id: "9ef84268-d588-465a-a308-a864a43d0070"
+  page_size: 1000
+  max_pages: 500
+  sleep_seconds: 1.0
+  timeout_seconds: 30
+  max_retries: 5
+
+scope:
+  commodities: ["Onion", "Potato", "Tomato"]
+  states: ["Maharashtra", "Uttar Pradesh", "Karnataka",
+           "Gujarat", "Madhya Pradesh", "Rajasthan",
+           "West Bengal", "Bihar"]
+
+quality:
+  min_coverage_pct: 70.0
+  min_observations: 200
+  min_markets_for_spread: 10
+  outlier_z_threshold: 4.0
+
+paths:
+  raw: "data/raw"
+  processed: "data/processed"
+  quarantine: "data/quarantine"
+  warehouse: "data/warehouse/sourcing.duckdb"

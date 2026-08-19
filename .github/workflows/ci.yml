@@ -1,0 +1,19 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      # No network in CI: every HTTP call in the suite is mocked with respx.
+      # --cov-fail-under is raised to 85 once Phase 3 lands real transform code.
+      - run: pytest -v --cov=ingest --cov=transform --cov=simulate --cov-report=term-missing

@@ -1,0 +1,46 @@
+{
+  "index_name": "9ef84268-d588-465a-a308-a864a43d0070",
+  "title": "Variety-wise Daily Market Prices Data of Commodity",
+  "total": 45231,
+  "count": 3,
+  "limit": "1000",
+  "offset": "0",
+  "records": [
+    {
+      "state": "Maharashtra",
+      "district": "Nashik",
+      "market": "Lasalgaon",
+      "commodity": "Onion",
+      "variety": "Red",
+      "grade": "FAQ",
+      "arrival_date": "18/08/2026",
+      "min_price": "1200",
+      "max_price": "1850",
+      "modal_price": "1600"
+    },
+    {
+      "state": "Maharashtra",
+      "district": "Pune",
+      "market": "Pune",
+      "commodity": "Onion",
+      "variety": "Local",
+      "grade": "FAQ",
+      "arrival_date": "18/08/2026",
+      "min_price": "1,400",
+      "max_price": "2100",
+      "modal_price": "1750"
+    },
+    {
+      "state": "Karnataka",
+      "district": "Bangalore",
+      "market": "Bangalore",
+      "commodity": "Onion",
+      "variety": "Bellary",
+      "grade": "FAQ",
+      "arrival_date": "18/08/2026",
+      "min_price": "1500",
+      "max_price": "2400",
+      "modal_price": "2000"
+    }
+  ]
+}

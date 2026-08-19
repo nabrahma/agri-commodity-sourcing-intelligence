@@ -1,0 +1,30 @@
+# Every business assumption in one auditable place.
+# If a number influences the headline finding, it lives here and is
+# named in METHOD.md and swept in the Phase 7 sensitivity grid.
+
+buyer:
+  monthly_requirement_tonnes: 500
+  purchase_frequency: "weekly"
+  max_radius_km: 500
+  home_market: "Lasalgaon"
+
+costs:
+  transport_inr_per_qtl_per_100km: 4.0
+  storage_inr_per_qtl_per_week: 15.0
+  market_commission_pct: 0.0        # explicitly excluded; see LIMITATIONS.md
+
+commodities:
+  Onion:
+    max_storage_weeks: 12
+    shrinkage_ratio_per_week: 0.03
+  Potato:
+    max_storage_weeks: 8
+    shrinkage_ratio_per_week: 0.02
+  Tomato:
+    max_storage_weeks: 1
+    shrinkage_ratio_per_week: 0.08
+
+strategy_s3:
+  dip_trigger_ratio: 0.90     # buy extra when price < 0.90 * MA20
+  moving_average_days: 20
+  max_multiple_of_need: 2.0
