@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import re
+import subprocess
 
 import pytest
 import yaml
-
-from tests.conftest import walk_source_files
 
 REQUIRED_DOCS = (
     "README.md",
@@ -27,12 +26,18 @@ SOURCE_SUFFIXES = {".py", ".sql", ".yml", ".yaml", ".toml", ".md", ".csv"}
 
 
 def tracked_files(project_root):
-    for path in walk_source_files(project_root, SOURCE_SUFFIXES):
-        # The build spec is this project's input, not its output; and this
-        # module necessarily contains the marker strings it searches for.
-        if path.name in ("build-spec.md", "test_docs.py"):
+    """Files git actually tracks. Untracked scratch files are not part of the
+    deliverable and must not fail a check on it."""
+    listed = subprocess.run(
+        ["git", "ls-files"], cwd=project_root, capture_output=True, text=True
+    ).stdout.split()
+    for name in listed:
+        path = project_root / name
+        # This module necessarily contains the marker strings it searches for.
+        if path.suffix not in SOURCE_SUFFIXES or path.name == "test_docs.py":
             continue
-        yield path
+        if path.exists():
+            yield path
 
 
 # --- 11.1 ------------------------------------------------------------------
@@ -136,7 +141,7 @@ def test_brief_states_a_range_not_only_a_point(project_root):
     assert re.search(r"₹\s?[\d,.]+\s*(lakh|crore|/quintal|/qtl)", brief)
     # A point estimate hides the uncertainty; a range is the honest form.
     assert re.search(
-        r"\d+(\.\d+)?%\s*(to|–|-)\s*\d+(\.\d+)?%", brief
+        r"\d+(\.\d+)?%\s*(to|-|-)\s*\d+(\.\d+)?%", brief
     ), "state the saving as a range, not only a point"
     assert "Limitations" in brief
     assert "Recommendation" in brief

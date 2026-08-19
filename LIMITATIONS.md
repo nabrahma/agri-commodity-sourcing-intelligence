@@ -5,7 +5,7 @@ Read this before quoting any figure from the dashboard or the brief.
 
 ---
 
-## 0. Grade mixing — the largest error found, and only partly fixed
+## 0. Grade mixing - the largest error found, and only partly fixed
 
 Markets quote different grades under a single commodity name. Sambhal lists
 Red onion at ~₹1,608 a quintal; Sikar lists 1st Sort at ~₹978; Harda lists
@@ -37,17 +37,17 @@ well-covered ones.
 that are, by construction, the best-behaved. The true spread across *all*
 markets is probably wider, so the arbitrage opportunity may be understated.
 Against that, the excluded markets may be thin for reasons that also make
-them unusable in practice — a market reporting twice a month cannot supply
+them unusable in practice - a market reporting twice a month cannot supply
 a weekly buyer.
 
 **This is the binding assumption.** Swept at 45 / 55 / 65, the saving moves
-from **22.2% to 35.5%** — a 13-point swing, far larger than any other
+from **22.2% to 35.5%** - a 13-point swing, far larger than any other
 parameter. The direction survives (S2 beats S1 in every run) but the
 magnitude does not.
 
 The 55% threshold is itself a judgement made against this data: the archive
 is not a true daily series (median market coverage 50.7%), and at the build
-spec's original 70% only **4 markets** qualified — too few to compute a
+spec's original 70% only **4 markets** qualified - too few to compute a
 spread at all.
 
 ---
@@ -58,16 +58,16 @@ spread at all.
 Real freight is none of those things: it is negotiated, varies by season,
 lane and truck availability, has minimums, and does not scale linearly with
 distance. The model also uses **great-circle distance**, which is shorter
-than any real road — typically by 20–30% in this geography.
+than any real road - typically by 20-30% in this geography.
 
 **Effect on the number: far smaller than expected.** Doubling freight from
 ₹4 to ₹6 per quintal per 100 km moves the saving by **0.3 percentage
 points**. The price gap between markets (₹500+/quintal) dwarfs the haulage
-(₹5–15/quintal at these distances).
+(₹5-15/quintal at these distances).
 
 That is worth stating plainly because it inverts the prior: on synthetic
 data transport ranked first in the tornado; on real data it ranks second to
-last. Freight is not what this conclusion hangs on — market selection is.
+last. Freight is not what this conclusion hangs on - market selection is.
 
 ---
 
@@ -80,7 +80,7 @@ loading.
 
 **Effect on the number:** these costs are broadly proportional to the value
 purchased and apply at *every* market, so they mostly cancel between
-strategies. They do not cancel entirely — commission rates differ by state,
+strategies. They do not cancel entirely - commission rates differ by state,
 and a distant market may have a different rate than the home market. The
 absolute cost figures are therefore too low; the *relative* comparison
 between S1, S2 and S3 is affected less.
@@ -145,4 +145,4 @@ order of size: residual grade differences that this data cannot resolve
 (§0), the coverage threshold that decides which markets count (§1), and the
 assumption that unlimited quantity is available at the quoted price (§4).
 Read the finding as *"a buyer anchored to an expensive market is probably
-leaving 20–35% on the table"* — not as a number to put in a budget.
+leaving 20-35% on the table"* - not as a number to put in a budget.

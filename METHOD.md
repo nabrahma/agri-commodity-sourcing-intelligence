@@ -12,8 +12,8 @@ is here, and the value it depends on is in `config/`.
 |---|---|
 | All prices | ₹ per **quintal** (100 kg) |
 | Tonne to quintal | 1 tonne = **10 quintals** (`simulate/costs.py::TONNES_TO_QUINTALS`) |
-| Percentages | suffix `_pct`, expressed 0–100 |
-| Ratios | suffix `_ratio`, expressed 0–1 |
+| Percentages | suffix `_pct`, expressed 0-100 |
+| Ratios | suffix `_ratio`, expressed 0-1 |
 | Dates | suffix `_date`; timestamps `_at_utc`, always UTC |
 | Fiscal year | April to March. 2026-03-31 is FY2025-26; 2026-04-01 is FY2026-27 |
 
@@ -24,7 +24,7 @@ because a 10× error there would invalidate every rupee figure in the project.
 
 ## 2. Source and ingestion
 
-**Source:** `data.gov.in` resource `9ef84268-d588-465a-a308-a864a43d0070` —
+**Source:** `data.gov.in` resource `9ef84268-d588-465a-a308-a864a43d0070` -
 variety-wise daily wholesale prices from India's agricultural market
 network. Prices arrive as strings; keyword fields require a `.keyword`
 suffix in filters.
@@ -74,7 +74,7 @@ Zero and negative values are rejected as `NON_POSITIVE_PRICE`.
 ### 3.3 Price triple rule
 
 Rejects `min > max` (`MIN_GT_MAX`) and `modal` outside `[min, max]`
-(`MODAL_OUT_OF_RANGE`). Boundary values — `modal == min`, `modal == max` —
+(`MODAL_OUT_OF_RANGE`). Boundary values - `modal == min`, `modal == max` -
 are **valid**.
 
 ### 3.4 Reject reasons
@@ -92,7 +92,7 @@ inputs.
 
 ### 3.5 Grain
 
-`(arrival_date, market_canonical, commodity_canonical, variety, grade)` —
+`(arrival_date, market_canonical, commodity_canonical, variety, grade)` -
 unique in the clean output and enforced as a primary key in the warehouse.
 
 ### 3.6 Intraday spread
@@ -157,11 +157,11 @@ sourcing candidate.
 **On the 55% threshold.** The build spec proposed 70%, calibrated for a
 true daily feed. The historical archives are not that: mandis trade on
 market days, so median market coverage is 50.7% and the best market over
-five years reaches 88.3%. At 70% only **4 markets** qualified — fewer than
+five years reaches 88.3%. At 70% only **4 markets** qualified - fewer than
 `min_markets_for_spread`, so no spread could be computed at all. 55%
 corresponds to a market trading roughly four days a week consistently and
 yields a 54-market panel. This is a judgement call, which is why it is
-swept in the sensitivity grid — where it turns out to be the **binding
+swept in the sensitivity grid - where it turns out to be the **binding
 assumption**.
 
 | Threshold | Value | Config key |
@@ -178,7 +178,7 @@ assumption**.
 Each query is a version-controlled `.sql` file whose first line declares its
 grain. Values are always bound as parameters, never interpolated.
 
-### 5.1 Spread — `01_spread.sql`
+### 5.1 Spread - `01_spread.sql`
 
 GRAIN: one row per (date, commodity).
 
@@ -191,7 +191,7 @@ could actually have paid. Excludes flagged outliers, excludes non-included
 markets, and drops days with fewer than `min_markets_for_spread` reporting
 markets.
 
-### 5.2 Seasonality — `02_seasonality.sql`
+### 5.2 Seasonality - `02_seasonality.sql`
 
 GRAIN: one row per (commodity, month).
 
@@ -203,7 +203,7 @@ The baseline is the **unweighted mean of the twelve monthly averages**, not
 the mean of all daily prices, so a 31-day month does not carry more weight
 than a 28-day one purely because of the calendar.
 
-### 5.3 Volatility — `03_volatility.sql`
+### 5.3 Volatility - `03_volatility.sql`
 
 GRAIN: one row per (market, commodity, fiscal_year).
 
@@ -214,12 +214,12 @@ cv = STDDEV_SAMP(modal_price) / AVG(modal_price)
 Sample standard deviation, so a market with a single observation yields
 NULL rather than a misleading zero.
 
-### 5.4 Coverage — `04_coverage.sql`
+### 5.4 Coverage - `04_coverage.sql`
 
 GRAIN: one row per (market, commodity). Same definition as the inclusion
 rule in §4.1, so the dashboard and the warehouse can never disagree.
 
-### 5.5 Reporting intensity — `05_arrivals.sql`
+### 5.5 Reporting intensity - `05_arrivals.sql`
 
 GRAIN: one row per (date, commodity). **This is a count of reporting
 markets, not arrival tonnage.** The feed carries prices only; it has no
@@ -233,8 +233,8 @@ shown.
 ### 6.1 The look-ahead firewall
 
 Every strategy receives a `PriceView`, which filters its frame to
-`as_of_date` on construction and exposes exactly three accessors —
-`current_prices`, `latest_prices`, `trailing_mean` — none of which can
+`as_of_date` on construction and exposes exactly three accessors -
+`current_prices`, `latest_prices`, `trailing_mean` - none of which can
 return a later row. This is a structural guarantee, not a convention.
 Three tests assert it, including one that introspects every public method
 and checks the maximum date it returns.
@@ -258,7 +258,7 @@ tomato can never stockpile.
 | | Rule |
 |---|---|
 | **S1** | Buy the exact weekly requirement at the home market, every week. |
-| **S2** | Buy the requirement at whichever reachable market has the lowest **landed** cost (modal + freight) — not the lowest modal price. |
+| **S2** | Buy the requirement at whichever reachable market has the lowest **landed** cost (modal + freight) - not the lowest modal price. |
 | **S3** | S2, plus: when the chosen market's price is below `dip_trigger_ratio × MA20`, buy up to `max_multiple_of_need × need`, limited by storage headroom. Inventory is always drawn down before buying. Falls back to S2 behaviour whenever the moving average is unavailable. |
 
 ### 6.4 Weekly sequence
@@ -272,7 +272,7 @@ purchase ≥ 0, no shortfall.
 If a market does not quote on the decision day, its most recent quote
 within **7 days** is used. Beyond that it is treated as unavailable. If no
 candidate market has a usable price, the run raises `NoCandidateMarketsError`
-— it never fabricates a number.
+- it never fabricates a number.
 
 ### 6.6 Costs
 
@@ -283,7 +283,7 @@ storage_inr           = inventory_qtl * storage_inr_per_qtl_per_week
 surviving_inventory   = inventory_qtl * (1 - shrinkage_ratio_per_week)
 ```
 
-Distance is great-circle (haversine, Earth radius 6371.0 km) — road
+Distance is great-circle (haversine, Earth radius 6371.0 km) - road
 distance is longer, so freight is understated; see LIMITATIONS.md.
 
 ---
@@ -341,7 +341,7 @@ the home market quotes almost every day (361 reporting days). 2019 and 2023
 are part-years in the archive and 2021 has a 309-day gap, so simulating
 across them would mean buying on stale quotes rather than observed prices.
 
-**Why the variety is pinned — this one changes the answer.** Markets quote
+**Why the variety is pinned - this one changes the answer.** Markets quote
 different grades of the same commodity: Sambhal lists Red onion at ~₹1,608
 a quintal, Sikar lists 1st Sort at ~₹978, Harda lists Medium at ~₹830. The
 two markets never quote the same variety on the same day. Comparing across

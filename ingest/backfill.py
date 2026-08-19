@@ -341,7 +341,7 @@ def write_reconciliation_report(report: dict, path: Path, verdict: str = "") -> 
     divergence = report["divergence"]
 
     lines = [
-        "# Source reconciliation — API pull vs historical backfill",
+        "# Source reconciliation - API pull vs historical backfill",
         "",
         f"Generated {datetime.now().date().isoformat()}.",
         "",

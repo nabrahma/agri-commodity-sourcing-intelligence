@@ -19,7 +19,7 @@ ANALYTICS_DIR = PROJECT_ROOT / "data" / "processed" / "analytics"
 SIMULATION_DIR = PROJECT_ROOT / "data" / "processed" / "simulation"
 ASSUMPTIONS_PATH = PROJECT_ROOT / "config" / "assumptions.yaml"
 
-DATA_SOURCE = "data.gov.in — daily wholesale market prices"
+DATA_SOURCE = "data.gov.in - daily wholesale market prices"
 
 REQUIRED_PARQUET = {
     "spread": ANALYTICS_DIR / "spread.parquet",
@@ -211,9 +211,9 @@ def tab_simulation(commodity: str) -> None:
         return
 
     labels = {
-        "S1": "S1 — always buy at home market",
-        "S2": "S2 — lowest landed cost in radius",
-        "S3": "S3 — S2 plus buy ahead on dips",
+        "S1": "S1 - always buy at home market",
+        "S2": "S2 - lowest landed cost in radius",
+        "S3": "S3 - S2 plus buy ahead on dips",
     }
     columns = st.columns(3)
     for column, strategy in zip(columns, ("S1", "S2", "S3"), strict=False):

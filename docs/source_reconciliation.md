@@ -1,4 +1,4 @@
-# Source reconciliation — API pull vs historical backfill
+# Source reconciliation - API pull vs historical backfill
 
 Generated 2026-08-19.
 
@@ -49,8 +49,8 @@ no match rate to compute.
 **Consequence for the analysis:** the 1,307,905 archive rows the findings
 rest on **have not been cross-validated against an independent measurement**
 of the same market-days, because no such measurement is available. The
-archive schema also differs from the live feed — `_state_` rather than
-`state`, ISO timestamps rather than DD/MM/YYYY, and no `grade` field at all —
+archive schema also differs from the live feed - `_state_` rather than
+`state`, ISO timestamps rather than DD/MM/YYYY, and no `grade` field at all -
 which is consistent with separately produced extracts rather than one series
 split in two. Whether the two would agree on a shared date is unknown.
 

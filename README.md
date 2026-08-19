@@ -15,7 +15,7 @@ shrinkage), and a week-by-week simulation of three sourcing strategies:
 | S3 | Spatial + timing | S2, plus buy ahead when price dips below its trailing mean |
 
 **Data source:** the Government of India open-data platform
-(`data.gov.in`), resource `9ef84268-d588-465a-a308-a864a43d0070` —
+(`data.gov.in`), resource `9ef84268-d588-465a-a308-a864a43d0070` -
 variety-wise daily wholesale prices from the national agricultural market
 network. The method is source-agnostic; the feed is what happens to be
 publicly available at daily granularity across hundreds of markets.
@@ -23,15 +23,15 @@ publicly available at daily granularity across hundreds of markets.
 ## The answer
 
 Built on **1,307,905 observed price records** from India's national mandi
-archive (2019–2023, 8 states), simulating 52 weekly purchase decisions over
+archive (2019-2023, 8 states), simulating 52 weekly purchase decisions over
 calendar 2022 for a 500 tonne/month onion buyer.
 
-> ### The saving is 11%–38%, median 33% — and which number you get depends on where you buy today, not on where you could buy.
-> Best reachable landed cost is **₹1,039–1,065/quintal** almost regardless of
+> ### The saving is 11%-38%, median 33% - and which number you get depends on where you buy today, not on where you could buy.
+> Best reachable landed cost is **₹1,039-1,065/quintal** almost regardless of
 > starting market. A buyer anchored at Sambhal (₹1,611/qtl) saves **₹3.4
 > crore a year**; one already at Siyana (₹1,169/qtl) saves 11%.
 
-**The binding assumption is which markets you count** — at a 45% coverage
+**The binding assumption is which markets you count** - at a 45% coverage
 bar the saving is 22.2%, at 65% it is 35.5%. Freight barely matters:
 doubling it moves the answer 0.3 points, because the price gap dwarfs the
 haulage.
@@ -112,4 +112,4 @@ tests/       ~205 tests across unit, contract, property, golden and e2e
   has a count in `docs/data_quality.md`.
 - **All prices are ₹ per quintal (100 kg).** One tonne is ten quintals.
   There is a dedicated test guarding that conversion.
-- **No magic numbers in code** — every threshold lives in `config/`.
+- **No magic numbers in code** - every threshold lives in `config/`.

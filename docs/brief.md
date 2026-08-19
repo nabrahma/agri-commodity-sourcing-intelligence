@@ -1,9 +1,9 @@
 # Your sourcing cost is set by which mandi you stand in
 
-**Onion sourcing intelligence for a fixed-volume buyer — one page.**
+**Onion sourcing intelligence for a fixed-volume buyer - one page.**
 
 > **Data:** 1,307,905 observed price records from India's national mandi
-> archive (data.gov.in), 2019–2023, across 8 states. Simulation run on
+> archive (data.gov.in), 2019-2023, across 8 states. Simulation run on
 > calendar 2022. All figures reproducible with `make all`.
 
 ---
@@ -21,15 +21,15 @@ price itself?
 - 254 markets geocoded and filtered to 54 that report often enough to be a
   reliable weekly source.
 - 52 weekly purchase decisions over 2022, each taken through a price view
-  filtered to the decision date — so no strategy can see a future price.
+  filtered to the decision date - so no strategy can see a future price.
 
-## Finding 1 — the same variety, the same day, very different prices
+## Finding 1 - the same variety, the same day, very different prices
 
 Across 25 qualifying markets within 500 km, **Red onion traded at ₹1,040 a
-quintal at the cheapest reachable market against ₹1,611 at Sambhal** — a
+quintal at the cheapest reachable market against ₹1,611 at Sambhal** - a
 55% premium, sustained across the year rather than on isolated days.
 
-## Finding 2 — the saving is a property of where you already buy
+## Finding 2 - the saving is a property of where you already buy
 
 This is the result that matters, and it is not a single number:
 
@@ -43,13 +43,13 @@ This is the result that matters, and it is not a single number:
 
 Across all 25 candidate home markets the saving runs **11% to 38%, median
 33%**. The striking part is the third column: the best reachable landed cost
-is ₹1,039–1,065 almost regardless of where you start. **The opportunity is
-not that some markets are cheap — it is that some buyers are anchored to an
+is ₹1,039-1,065 almost regardless of where you start. **The opportunity is
+not that some markets are cheap - it is that some buyers are anchored to an
 expensive one.**
 
-## Finding 3 — the timing strategy destroyed value
+## Finding 3 - the timing strategy destroyed value
 
-S3 (buy ahead on price dips) cost **₹1,111/qtl against S2's ₹1,040** — 7%
+S3 (buy ahead on price dips) cost **₹1,111/qtl against S2's ₹1,040** - 7%
 worse. Onion shrinks at 3% a week and storage costs ₹15/quintal/week;
 together those consumed more than the dips returned. Reported as found.
 
@@ -64,7 +64,7 @@ closer to 11%, and may not be worth the operational change.
 **The first question to ask is not "where is cheapest" but "how expensive is
 where I already buy".** That is answerable in an afternoon from this data.
 
-## Limitations — two of these are large
+## Limitations - two of these are large
 
 - **Grade mixing was the single biggest error found, and it is only
   partly fixed.** Markets quote different grades under one commodity name.
@@ -74,7 +74,7 @@ where I already buy".** That is answerable in an afternoon from this data.
   number down further.
 - **The binding assumption is which markets you count**, not freight. At a
   45% coverage bar the saving is 22.2%; at 65% it is 35.5%. Freight barely
-  matters — doubling it moves the answer by 0.3 points — because the price
+  matters - doubling it moves the answer by 0.3 points - because the price
   gap dwarfs the haulage.
 - **Unlimited quantity is assumed.** The model buys 115 tonnes a week at the
   cheapest market's modal price. No market depth data exists in this feed,
@@ -84,5 +84,5 @@ where I already buy".** That is answerable in an afternoon from this data.
 
 *Method and every threshold in [METHOD.md](../METHOD.md); full caveats in
 [LIMITATIONS.md](../LIMITATIONS.md). The week-by-week audit trail is in
-[weekly_log_sample.csv](weekly_log_sample.csv) — every rupee traces to a
+[weekly_log_sample.csv](weekly_log_sample.csv) - every rupee traces to a
 market, a date and a price that existed on the decision day.*

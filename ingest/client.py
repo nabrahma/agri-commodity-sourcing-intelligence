@@ -1,6 +1,6 @@
 """HTTP client for the data.gov.in daily market price resource.
 
-Fetches and returns raw dicts. No parsing, no cleaning, no storage — a
+Fetches and returns raw dicts. No parsing, no cleaning, no storage - a
 transport bug and a parsing bug should never be able to look alike.
 """
 
